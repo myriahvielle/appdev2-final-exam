@@ -33,11 +33,7 @@ const SignupScreen = ({ onSignUp, onNavigateLogin }: SignUpProps) => {
     }
     try {
       const result = await registerMutation({fullname: fullName, username: email, password });
-      if (result && typeof result === "object" && "success" in result) {
-        Alert.alert("Error", (result as any).message);
-      } else {
-        onSignUp(result as Id<"users">);
-      }
+      console.log(result);
     } catch (error) {
       Alert.alert("Error", "Unexpected error occurred. Please try again!");
       console.log(error);

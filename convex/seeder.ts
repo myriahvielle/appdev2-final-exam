@@ -38,6 +38,6 @@ export const seed = mutation({
       });
     }
 
-    return Successfully seeded 10 tasks linked to userId: ${userId};
+    return " Successfully seeded 10 tasks linked to userId: ${userId};"
   },
 });
