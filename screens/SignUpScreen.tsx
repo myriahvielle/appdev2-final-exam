@@ -1,4 +1,3 @@
-import React, { FC } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,33 +6,29 @@ import {
   TouchableOpacity,
   TextInput,
 } from "react-native";
-import Ionicons from "@react-native-vector-icons/ionicons";
+import { Ionicons } from "@expo/vector-icons"; 
+import React from "react";
 
-const SignUpScreen: FC = () => {
+
+const SignupScreen = () => {
   return (
     <View style={styles.container}>
+      {/* 1. Header Section */}
       <View style={styles.header}>
         <Image
           source={require("./../../assets/signup.webp")}
-          style={styles.image}
+          style={styles.illustration}
+          resizeMode="contain"
         />
       </View>
 
+      {/* 2. Form Section */}
       <View style={styles.formContainer}>
         <Text style={styles.label}>Full Name</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="John Doe"
-          autoCapitalize="words"
-        />
+        <TextInput style={styles.input} placeholder="John Doe" />
 
         <Text style={styles.label}>Email Address</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="john@gmail.com"
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
+        <TextInput style={styles.input} placeholder="john@gmail.com" />
 
         <Text style={styles.label}>Password</Text>
         <TextInput
@@ -52,11 +47,9 @@ const SignUpScreen: FC = () => {
           <TouchableOpacity style={styles.socialIcon}>
             <Ionicons name="logo-google" size={30} color="#DB4437" />
           </TouchableOpacity>
-
           <TouchableOpacity style={styles.socialIcon}>
             <Ionicons name="logo-apple" size={30} color="black" />
           </TouchableOpacity>
-
           <TouchableOpacity style={styles.socialIcon}>
             <Ionicons name="logo-facebook" size={30} color="#4267B2" />
           </TouchableOpacity>
@@ -64,8 +57,8 @@ const SignUpScreen: FC = () => {
 
         <View style={styles.footer}>
           <Text>Already have an account? </Text>
-          <TouchableOpacity onPress={() => {}}>
-            <Text style={styles.linkText}>Login</Text>
+          <TouchableOpacity>
+            <Text style={styles.linkText}>Log In</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -73,42 +66,77 @@ const SignUpScreen: FC = () => {
   );
 };
 
-export default SignUpScreen;
-
 const styles = StyleSheet.create({
   container: {
-    flex: 1 as number,
+    flex: 1,
     backgroundColor: "#7D7AFF",
-    paddingTop: 40 as number,
+    paddingTop: 40,
   },
   header: {
-    flex: 1 as number,
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
-  image: {
-    width: "80%" as unknown as number | string,
-    height: "70%" as unknown as number | string,
+  illustration: {
+    width: "80%",
+    height: "70%",
   },
   formContainer: {
-    flex: 2 as number,
+    flex: 2,
     backgroundColor: "#FFF",
-    borderTopLeftRadius: 60 as number,
-    borderTopRightRadius: 60 as number,
-    padding: 30 as number,
+    borderTopLeftRadius: 60,
+    borderTopRightRadius: 60,
+    padding: 30,
   },
   label: {
-    fontSize: 14 as number,
+    fontSize: 14,
     color: "#666",
-    marginBottom: 5 as number,
-    marginTop: 15 as number,
+    marginBottom: 5,
+    marginTop: 15,
   },
   input: {
     backgroundColor: "#F0F0F0",
-    paddingVertical: undefined as unknown as never,
-    paddingHorizontal: undefined as unknown as never,
-    paddingTopWidthHackForTypingSafeBuildTimeOnly:
-      undefined as unknown as never,
-    paddingVerticalHackForTypingSafeBuildTimeOnly:
-      undefined as unknown as never,
+    padding: 15,
+    borderRadius: 15,
+    fontSize: 16,
+  },
+  loginButton: {
+    backgroundColor: "#FFCC00",
+    padding: 18,
+    borderRadius: 15,
+    alignItems: "center",
+    marginTop: 30,
+  },
+  loginButtonText: {
+    fontWeight: "bold",
+    fontSize: 18,
+  },
+  orText: {
+    textAlign: "center",
+    marginVertical: 20,
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  socialRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    // Use marginRight on individual icons if gap is not supported in your environment
+    gap: 20, 
+  },
+  socialIcon: {
+    backgroundColor: "#F0F0F0",
+    padding: 15,
+    borderRadius: 15,
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 30,
+  },
+  linkText: {
+    color: "#FFCC00",
+    fontWeight: "bold",
+  },
+});
 
+export default SignupScreen;
