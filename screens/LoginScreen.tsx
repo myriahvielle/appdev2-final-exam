@@ -9,21 +9,15 @@ import {
   Alert,
 } from "react-native";
 import Ionicons from "@react-native-vector-icons/ionicons";
-
 import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
-import { Id } from "../convex/_generated/dataModel";
-import { useNavigate } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 
-interface LoginProps {
-  onLogin: (id: Id<"users">) => void;
-  onNavigateSignUp: () => void;
-}
-
-const LoginScreen = ({ onLogin, onNavigateSignUp }: LoginProps) => {
+const LoginScreen = () => {
+  const navigation = useNavigation<any>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate=useNavigate();
+
   const loginMutation = useMutation(api.users.login);
 
   const handleLogin = async () => {
@@ -31,32 +25,32 @@ const LoginScreen = ({ onLogin, onNavigateSignUp }: LoginProps) => {
       Alert.alert("Error", "Please enter username and password!");
       return;
     }
+
     try {
       const result = await loginMutation({ username: email, password });
+
       if (result.success && result.userId) {
-        onLogin(result.userId);
         setEmail("");
         setPassword("");
+        navigation.navigate("Todo", { userId: result.userId });
       } else {
         Alert.alert("Login Failed", result.message);
       }
     } catch (error) {
-      Alert.alert("Error", "Unexpected error occurred. Please try again!");
+      Alert.alert("Error", "Unexpected error happened. Please try again!");
       console.log(error);
     }
   };
+
   return (
     <View style={styles.container}>
-      {/* 1. Header Section */}
       <View style={styles.header}>
         <Image
-          source={require("../assets/login.webp")}
+          source={require("./../assets/login.webp")}
           style={styles.illustration}
         />
       </View>
 
-
-      {/* 2. Form Section */}
       <View style={styles.formContainer}>
         <Text style={styles.label}>Email Address</Text>
         <TextInput
@@ -70,24 +64,20 @@ const LoginScreen = ({ onLogin, onNavigateSignUp }: LoginProps) => {
         <TextInput
           style={styles.input}
           secureTextEntry
-          placeholder="******"
+          placeholder="********"
           value={password}
           onChangeText={setPassword}
         />
-
 
         <TouchableOpacity>
           <Text style={styles.forgotText}>Forgot Password?</Text>
         </TouchableOpacity>
 
-
         <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
           <Text style={styles.loginButtonText}>Login</Text>
         </TouchableOpacity>
 
-
         <Text style={styles.orText}>Or</Text>
-
 
         <View style={styles.socialRow}>
           <TouchableOpacity style={styles.socialIcon}>
@@ -101,10 +91,9 @@ const LoginScreen = ({ onLogin, onNavigateSignUp }: LoginProps) => {
           </TouchableOpacity>
         </View>
 
-
         <View style={styles.footer}>
           <Text>Don't have an account? </Text>
-          <TouchableOpacity onPress={onNavigateSignUp}>
+          <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
             <Text style={styles.linkText}>Sign Up</Text>
           </TouchableOpacity>
         </View>
@@ -112,7 +101,6 @@ const LoginScreen = ({ onLogin, onNavigateSignUp }: LoginProps) => {
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {
@@ -198,6 +186,4 @@ const styles = StyleSheet.create({
   },
 });
 
-
 export default LoginScreen;
-
