@@ -3,15 +3,17 @@ import { mutation } from "./_generated/server";
 export const seed = mutation({
   args: {},
   handler: async (ctx) => {
+    // Get or create user
     let user = await ctx.db.query("users").first();
 
     if (!user) {
-      const userId = await ctx.db.insert("users", {
+      const id = await ctx.db.insert("users", {
+        fullname: "Seed User",
         username: "seeduser",
         password: "password123",
       });
 
-      user = await ctx.db.get(userId);
+      user = await ctx.db.get(id);
     }
 
     const initialTasks = [
@@ -24,7 +26,7 @@ export const seed = mutation({
       "Read 10 pages of a book",
       "Go for a 20-minute run",
       "Organize desk",
-      "Meditate for 5 minutes"
+      "Meditate for 5 minutes",
     ];
 
     for (const taskText of initialTasks) {
