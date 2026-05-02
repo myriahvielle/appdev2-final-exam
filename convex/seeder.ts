@@ -3,18 +3,19 @@ import { mutation } from "./_generated/server";
 export const seed = mutation({
   args: {},
   handler: async (ctx) => {
-    // Get or create user
-    let user = await ctx.db.query("users").first();
+    // Reuse existing seed user or create one
+    const existingUser = await ctx.db
+      .query("users")
+      .filter((q) => q.eq(q.field("username"), "seeduser"))
+      .unique();
 
-    if (!user) {
-      const id = await ctx.db.insert("users", {
-        fullname: "Seed User",
-        username: "seeduser",
-        password: "password123",
-      });
-
-      user = await ctx.db.get(id);
-    }
+    const userId = existingUser
+      ? existingUser._id
+      : await ctx.db.insert("users", {
+          fullname: "fullname",
+          username: "seeduser",
+          password: "password123",
+        });
 
     const initialTasks = [
       "Buy groceries",
@@ -33,10 +34,10 @@ export const seed = mutation({
       await ctx.db.insert("todos", {
         text: taskText,
         isCompleted: Math.random() > 0.7,
-        userId: user._id,
+        userId,
       });
     }
 
-    return "Successfully seeded 10 tasks!";
+    return Successfully seeded 10 tasks linked to userId: ${userId};
   },
 });

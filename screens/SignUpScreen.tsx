@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,58 +6,106 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
+  Alert,
 } from "react-native";
 import Ionicons from "@react-native-vector-icons/ionicons";
 
-const SignupScreen: React.FC = () => {
+import { useMutation } from "convex/react";
+import { api } from "../convex/_generated/api";
+import { Id } from "../convex/_generated/dataModel";
+
+interface SignUpProps {
+  onSignUp: (id: Id<"users">) => void;
+  onNavigateLogin: () => void;
+}
+
+const SignupScreen = ({ onSignUp, onNavigateLogin }: SignUpProps) => {
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const registerMutation = useMutation(api.users.register);
+
+  const handleSignUp = async () => {
+    if (!fullName || !email || !password) {
+      Alert.alert("Error", "Please fill in all fields!");
+      return;
+    }
+    try {
+      const result = await registerMutation({fullname: fullName, username: email, password });
+      if (result && typeof result === "object" && "success" in result) {
+        Alert.alert("Error", (result as any).message);
+      } else {
+        onSignUp(result as Id<"users">);
+      }
+    } catch (error) {
+      Alert.alert("Error", "Unexpected error occurred. Please try again!");
+      console.log(error);
+    }
+  };
   return (
     <View style={styles.container}>
       {/* 1. Header Section */}
       <View style={styles.header}>
         <Image
-          source={require("./../../assets/signup.webp")}
+          source={require("../assets/signup.webp")}
           style={styles.illustration}
         />
       </View>
 
+
       {/* 2. Form Section */}
       <View style={styles.formContainer}>
         <Text style={styles.label}>Full Name</Text>
-        <TextInput style={styles.input} placeholder="John Doe" />
+        <TextInput
+          style={styles.input}
+          placeholder="John Doe"
+          value={fullName}
+          onChangeText={setFullName}
+        />
 
         <Text style={styles.label}>Email Address</Text>
-        <TextInput style={styles.input} placeholder="john@gmail.com" />
+        <TextInput
+          style={styles.input}
+          placeholder="john@gmail.com"
+          value={email}
+          onChangeText={setEmail}
+        />
 
         <Text style={styles.label}>Password</Text>
         <TextInput
           style={styles.input}
           secureTextEntry
-          placeholder="********"
+          placeholder="******"
+          value={password}
+          onChangeText={setPassword}
         />
 
-        <TouchableOpacity style={styles.loginButton}>
+
+        <TouchableOpacity style={styles.loginButton} onPress={handleSignUp}>
           <Text style={styles.loginButtonText}>Sign Up</Text>
         </TouchableOpacity>
 
+
         <Text style={styles.orText}>Or</Text>
+
 
         <View style={styles.socialRow}>
           <TouchableOpacity style={styles.socialIcon}>
             <Ionicons name="logo-google" size={30} color="#DB4437" />
           </TouchableOpacity>
-
           <TouchableOpacity style={styles.socialIcon}>
             <Ionicons name="logo-apple" size={30} color="black" />
           </TouchableOpacity>
-
           <TouchableOpacity style={styles.socialIcon}>
             <Ionicons name="logo-facebook" size={30} color="#4267B2" />
           </TouchableOpacity>
         </View>
 
+
         <View style={styles.footer}>
           <Text>Already have an account? </Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={onNavigateLogin}>
             <Text style={styles.linkText}>Log In</Text>
           </TouchableOpacity>
         </View>
@@ -65,6 +113,7 @@ const SignupScreen: React.FC = () => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -149,5 +198,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
+
 
 export default SignupScreen;
