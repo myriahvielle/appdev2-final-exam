@@ -13,6 +13,7 @@ import Ionicons from "@react-native-vector-icons/ionicons";
 import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { Id } from "../convex/_generated/dataModel";
+import { useNavigate } from "@react-navigation/native";
 
 interface LoginProps {
   onLogin: (id: Id<"users">) => void;
@@ -22,7 +23,7 @@ interface LoginProps {
 const LoginScreen = ({ onLogin, onNavigateSignUp }: LoginProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const navigate=useNavigate();
   const loginMutation = useMutation(api.users.login);
 
   const handleLogin = async () => {

@@ -1,46 +1,48 @@
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
-import TodoScreen from "./screens/TodoScreen";
+
 import LoginScreen from "./screens/LoginScreen";
 import SignupScreen from "./screens/SignUpScreen";
-import { useState } from "react";
+import TodoScreen from "./screens/TodoScreen";
 import { Id } from "./convex/_generated/dataModel";
+
+// Define the types for your routes so useNavigation works correctly
+export type RootStackParamList = {
+  Login: undefined;
+  Signup: undefined;
+  Todo: { userId: Id<"users"> };
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL!, {
   unsavedChangesWarning: false,
 });
 
-type Screen = "login" | "signup" | "todo";
-
 export default function App() {
-  const [screen, setScreen] = useState<Screen>("login");
-  const [userId, setUserId] = useState<Id<"users"> | null>(null);
-
-  const handleLogin = (id: Id<"users">) => {
-    setUserId(id);
-    setScreen("todo");
-  };
-
-  const handleSignUp = (id: Id<"users">) => {
-    setUserId(id);
-    setScreen("todo");
-  };
-
   return (
     <ConvexProvider client={convex}>
-      {screen === "todo" && userId ? (
-        <TodoScreen userId={userId} />
-      ) : screen === "signup" ? (
-        <SignupScreen
-          onSignUp={handleSignUp}
-          onNavigateLogin={() => setScreen("login")}
-        />
-      ) : (
-        <LoginScreen
-          onLogin={handleLogin}
-          onNavigateSignUp={() => setScreen("signup")}
-        />
-      )}
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Login">
+          <Stack.Screen 
+            name="Login" 
+            component={LoginScreen} 
+            options={{ headerShown: false }} 
+          />
+          <Stack.Screen 
+            name="Signup" 
+            component={SignupScreen} 
+            options={{ title: "Create Account" }}
+          />
+          <Stack.Screen 
+            name="Todo" 
+            component={TodoScreen} 
+            options={{ title: "My Tasks" }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
     </ConvexProvider>
   );
 }
-

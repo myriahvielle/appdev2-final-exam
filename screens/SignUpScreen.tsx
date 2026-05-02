@@ -7,50 +7,62 @@ import {
   TouchableOpacity,
   TextInput,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import Ionicons from "@react-native-vector-icons/ionicons";
-
 import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
-import { Id } from "../convex/_generated/dataModel";
+import { useNavigation } from "@react-navigation/native";
 
-interface SignUpProps {
-  onSignUp: (id: Id<"users">) => void;
-  onNavigateLogin: () => void;
-}
+export default function SignupScreen() {
+  const navigation = useNavigation<any>();
+  const [fullName, setFullName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
-const SignupScreen = ({ onSignUp, onNavigateLogin }: SignUpProps) => {
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const register = useMutation(api.users.register);
 
-  const registerMutation = useMutation(api.users.register);
-
-  const handleSignUp = async () => {
-    if (!fullName || !email || !password) {
-      Alert.alert("Error", "Please fill in all fields!");
+  const handleSignup = async (): Promise<void> => {
+    if (!fullName.trim() || !email.trim() || !password.trim()) {
+      Alert.alert("Error", "Please fill in all fields.");
       return;
     }
+
+    setLoading(true);
     try {
-      const result = await registerMutation({fullname: fullName, username: email, password });
-      console.log(result);
+      const result = await register({
+        fullname: fullName.trim(),
+        username: email.trim(),
+        password: password.trim(),
+      });
+
+      if (typeof result === "object" && result !== null && "success" in result) {
+        if (!result.success) {
+          Alert.alert("Signup Failed", result.message as string);
+          return;
+        }
+      }
+
+      Alert.alert("Success", "Account created! Please log in.", [
+        { text: "OK", onPress: () => navigation.navigate("Login") },
+      ]);
     } catch (error) {
-      Alert.alert("Error", "Unexpected error occurred. Please try again!");
-      console.log(error);
+      Alert.alert("Error", "Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
+
   return (
     <View style={styles.container}>
-      {/* 1. Header Section */}
       <View style={styles.header}>
         <Image
-          source={require("../assets/signup.webp")}
-          style={styles.illustration}
+          source={require("./../assets/signup.webp")}
+          style={styles.image}
         />
       </View>
 
-
-      {/* 2. Form Section */}
       <View style={styles.formContainer}>
         <Text style={styles.label}>Full Name</Text>
         <TextInput
@@ -58,6 +70,7 @@ const SignupScreen = ({ onSignUp, onNavigateLogin }: SignUpProps) => {
           placeholder="John Doe"
           value={fullName}
           onChangeText={setFullName}
+          autoCapitalize="words"
         />
 
         <Text style={styles.label}>Email Address</Text>
@@ -66,25 +79,32 @@ const SignupScreen = ({ onSignUp, onNavigateLogin }: SignUpProps) => {
           placeholder="john@gmail.com"
           value={email}
           onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
         />
 
         <Text style={styles.label}>Password</Text>
         <TextInput
           style={styles.input}
           secureTextEntry
-          placeholder="******"
+          placeholder="********"
           value={password}
           onChangeText={setPassword}
         />
 
-
-        <TouchableOpacity style={styles.loginButton} onPress={handleSignUp}>
-          <Text style={styles.loginButtonText}>Sign Up</Text>
+        <TouchableOpacity
+          style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+          onPress={handleSignup}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#000" />
+          ) : (
+            <Text style={styles.loginButtonText}>Sign Up</Text>
+          )}
         </TouchableOpacity>
 
-
         <Text style={styles.orText}>Or</Text>
-
 
         <View style={styles.socialRow}>
           <TouchableOpacity style={styles.socialIcon}>
@@ -98,18 +118,16 @@ const SignupScreen = ({ onSignUp, onNavigateLogin }: SignUpProps) => {
           </TouchableOpacity>
         </View>
 
-
         <View style={styles.footer}>
           <Text>Already have an account? </Text>
-          <TouchableOpacity onPress={onNavigateLogin}>
+          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
             <Text style={styles.linkText}>Log In</Text>
           </TouchableOpacity>
         </View>
       </View>
     </View>
   );
-};
-
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -122,19 +140,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  backButton: {
-    top: 50,
-    left: 20,
-    backgroundColor: "#FFCC00",
-    padding: 8,
-    borderRadius: 10,
-  },
-  illustration: {
-    width: "80%",
+  image: {
+    width: "60%",
     height: "70%",
   },
   formContainer: {
-    flex: 2,
+    flex: 3,
     backgroundColor: "#FFF",
     borderTopLeftRadius: 60,
     borderTopRightRadius: 60,
@@ -152,17 +163,15 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     fontSize: 16,
   },
-  forgotText: {
-    textAlign: "right",
-    marginTop: 10,
-    color: "#666",
-  },
   loginButton: {
     backgroundColor: "#FFCC00",
     padding: 18,
     borderRadius: 15,
     alignItems: "center",
     marginTop: 30,
+  },
+  loginButtonDisabled: {
+    opacity: 0.6,
   },
   loginButtonText: {
     fontWeight: "bold",
@@ -176,6 +185,7 @@ const styles = StyleSheet.create({
   },
   socialRow: {
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "center",
     gap: 20,
   },
@@ -194,6 +204,3 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
-
-
-export default SignupScreen;
