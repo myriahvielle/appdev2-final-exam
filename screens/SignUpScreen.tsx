@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -5,66 +6,125 @@ import {
   Image,
   TouchableOpacity,
   TextInput,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons"; 
-import React from "react";
+import Ionicons from "@react-native-vector-icons/ionicons";
+import { useMutation } from "convex/react";
+import { api } from "../convex/_generated/api";
 
+export default function SignupScreen() {
+    const [fullName, setFullName] = useState<string>("");
+    const [email, setEmail] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
+    const [loading, setLoading] = useState<boolean>(false);
 
-const SignupScreen = () => {
-  return (
-    <View style={styles.container}>
-      {/* 1. Header Section */}
-      <View style={styles.header}>
-        <Image
-          source={require("./../../assets/signup.webp")}
-          style={styles.illustration}
-          resizeMode="contain"
-        />
-      </View>
+    const register = useMutation(api.users.register);
 
-      {/* 2. Form Section */}
-      <View style={styles.formContainer}>
-        <Text style={styles.label}>Full Name</Text>
-        <TextInput style={styles.input} placeholder="John Doe" />
+    const handleSignup = async (): Promise<void> => {
+        if (!fullName.trim() || !email.trim() || !password.trim()) {
+        Alert.alert("Error", "Please fill in all fields.");
+        return;
+        }
 
-        <Text style={styles.label}>Email Address</Text>
-        <TextInput style={styles.input} placeholder="john@gmail.com" />
+        setLoading(true);
+        try {
+        const result = await register({
+            username: email.trim(),
+            password: password.trim(),
+        });
 
-        <Text style={styles.label}>Password</Text>
-        <TextInput
-          style={styles.input}
-          secureTextEntry
-          placeholder="********"
-        />
+        if (typeof result === "object" && result !== null && "success" in result) {
+            if (!result.success) {
+            Alert.alert("Signup Failed", result.message as string);
+            return;
+            }
+        }
 
-        <TouchableOpacity style={styles.loginButton}>
-          <Text style={styles.loginButtonText}>Sign Up</Text>
-        </TouchableOpacity>
+        Alert.alert("Success", "Account created! Please log in.");
+        } catch (error) {
+        Alert.alert("Error", "Something went wrong. Please try again.");
+        } finally {
+        setLoading(false);
+        }
+    };
 
-        <Text style={styles.orText}>Or</Text>
-
-        <View style={styles.socialRow}>
-          <TouchableOpacity style={styles.socialIcon}>
-            <Ionicons name="logo-google" size={30} color="#DB4437" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.socialIcon}>
-            <Ionicons name="logo-apple" size={30} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.socialIcon}>
-            <Ionicons name="logo-facebook" size={30} color="#4267B2" />
-          </TouchableOpacity>
+    return (
+        <View style={styles.container}>
+        {/* 1. Header Section */}
+        <View style={styles.header}>
+            <Image
+            source={require("./../assets/signup.webp")}
+            style={styles.image}
+            />
         </View>
 
-        <View style={styles.footer}>
-          <Text>Already have an account? </Text>
-          <TouchableOpacity>
-            <Text style={styles.linkText}>Log In</Text>
-          </TouchableOpacity>
+        {/* 2. Form Section */}
+        <View style={styles.formContainer}>
+            <Text style={styles.label}>Full Name</Text>
+            <TextInput
+            style={styles.input}
+            placeholder="John Doe"
+            value={fullName}
+            onChangeText={setFullName}
+            autoCapitalize="words"
+            />
+
+            <Text style={styles.label}>Email Address</Text>
+            <TextInput
+            style={styles.input}
+            placeholder="john@gmail.com"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            />
+
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+            style={styles.input}
+            secureTextEntry
+            placeholder="********"
+            value={password}
+            onChangeText={setPassword}
+            />
+
+            <TouchableOpacity
+            style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+            onPress={handleSignup}
+            disabled={loading}
+            >
+            {loading ? (
+                <ActivityIndicator color="#000" />
+            ) : (
+                <Text style={styles.loginButtonText}>Sign Up</Text>
+            )}
+            </TouchableOpacity>
+
+            <Text style={styles.orText}>Or</Text>
+
+            <View style={styles.socialRow}>
+            <TouchableOpacity style={styles.socialIcon}>
+                <Ionicons name="logo-google" size={30} color="#DB4437" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.socialIcon}>
+                <Ionicons name="logo-apple" size={30} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.socialIcon}>
+                <Ionicons name="logo-facebook" size={30} color="#4267B2" />
+            </TouchableOpacity>
+            </View>
+
+            <View style={styles.footer}>
+            <Text>Already have an account? </Text>
+            <TouchableOpacity>
+                <Text style={styles.linkText}>Log In</Text>
+            </TouchableOpacity>
+            </View>
         </View>
-      </View>
-    </View>
-  );
-};
+        </View>
+    );
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -77,12 +137,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  illustration: {
-    width: "80%",
+  image: {
+    width: "60%",
     height: "70%",
   },
   formContainer: {
-    flex: 2,
+    flex: 3,
     backgroundColor: "#FFF",
     borderTopLeftRadius: 60,
     borderTopRightRadius: 60,
@@ -107,6 +167,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 30,
   },
+  loginButtonDisabled: {
+    opacity: 0.6,
+  },
   loginButtonText: {
     fontWeight: "bold",
     fontSize: 18,
@@ -119,9 +182,9 @@ const styles = StyleSheet.create({
   },
   socialRow: {
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "center",
-    // Use marginRight on individual icons if gap is not supported in your environment
-    gap: 20, 
+    gap: 20,
   },
   socialIcon: {
     backgroundColor: "#F0F0F0",
@@ -138,5 +201,3 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
-
-export default SignupScreen;
